@@ -1,8 +1,10 @@
 import React from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.css';
 import {hot} from 'react-hot-loader';
 import App from '../containers/app';
-import Docs from '../containers/docs';
+import SprintReport from '../containers/sprintReport';
+
 
 const Router = ({component: Component, children, ...rest}) => (
   <Route
@@ -18,7 +20,7 @@ const Root = () => (
     <div className="router-content">
       <Switch>
         <Router path="/" component={App} >
-          <Router exact path="/docs" component={Docs} />
+          <Router exact path="/report" component={SprintReport} />
         </Router>
       </Switch>
     </div>
