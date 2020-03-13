@@ -1,91 +1,147 @@
 import React, {Component} from 'react';
+import {Input, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, ListGroupItem, ListGroup} from 'reactstrap';
+import {keys, isEmpty} from 'lodash';
 import Report from '../components/report';
-
-const endpoint = '/rest/greenhopper/1.0/rapid/charts/sprintreport';
-// eslint-disable-next-line max-len
-const DEFAULT_TAB_URL = 'https://jira.atlassian.com/secure/RapidBoard.jspa?rapidView=446&view=reporting&chart=sprintRetrospective&sprint=6988';
+import {fetchBoradId, fetchSprintList, fetchSprintReport} from '../components/helpers/jiraHelper';
 
 class SprintReport extends Component {
   state = {
-    currentUrl: '',
-    reportApi: '',
-    rapidViewId: '',
-    sprintId: ''
+    jiraUrl: '',
+    projectName: '',
+    boardId: '',
+    selectedSprint: '',
+    sprintList: [],
+    error: '',
+    reportData: {}
   }
 
   componentDidMount() {
-    this.fetchData();
   }
 
   render() {
+    const {
+      sprintList, isSprintDropdownOpen, selectedSprint, reportData
+    } = this.state;
     return (
       <div>
-        <label htmlFor="basic-url">Current Url</label>
-        <div className="input-group mb-3">
-          <input
-            type="text"
-            className="form-control"
-            disabled
-            value={this.state.currentUrl}
-          />
+        {this.state.error && <div className="alert alert-warning" role="alert">
+          {this.state.error}
+        </div>}
+        <div className="flex-box search-form">
+          <div className="input-group mb-3">
+            <Input
+              type="text"
+              value={this.state.jiraUrl}
+              placeholder="Input your jira url, like https://jira.atlassian.com"
+              onChange={(event) => this.handleChange({jiraUrl: event.target.value})}
+            />
+          </div>
+          <div className="input-group mb-3">
+            <Input
+              type="text"
+              value={this.state.projectName}
+              placeholder="Project name"
+              onChange={event => this.handleChange({projectName: event.target.value})}
+            />
+          </div>
+          <div className="input-group-btn">
+            <Button color="primary" onClick={this.handleSubmit}>GO</Button>
+          </div>
         </div>
-        <label>rapidViewId:</label>
-        <div className="input-group mb-3">
-          <input
-            type="text"
-            className="form-control"
-            disabled
-            value={this.state.rapidViewId}
-          />
-        </div>
-        <label>sprintId:</label>
-        <div className="input-group mb-3">
-          <input
-            type="text"
-            className="form-control"
-            disabled
-            value={this.state.sprintId}
-          />
-        </div>
-        <label>reportApi:</label>
-        <div className="input-group mb-3">
-          <input
-            type="text"
-            className="form-control"
-            disabled
-            value={this.state.reportApi}
-          />
-        </div>
-        {this.state.reportApi && <Report reportApi={this.state.reportApi} />}
+        {!isEmpty(sprintList) && <div className="sprint-list-content">
+          <Dropdown isOpen={isSprintDropdownOpen} toggle={this.toggleSprintDropDown}>
+            <DropdownToggle caret>
+              {selectedSprint ? sprintList
+                .filter(sprint => sprint.id === selectedSprint)[0].name : 'Sprint List'}
+            </DropdownToggle>
+            <DropdownMenu className="no-outline">
+              <div className="sprint-list">
+                {sprintList.map((sprint, index) => (
+                  <ListGroupItem
+                    tag="a"
+                    key={index}
+                    header
+                    onClick={(event) => this.handleSprintChange(sprint.id)}
+                  >
+                    {sprint.name}
+                  </ListGroupItem>
+                ))}
+              </div>
+            </DropdownMenu>
+          </Dropdown>
+        </div>}
+        {!isEmpty(reportData) && <Report {...reportData} />}
       </div>
     );
   }
 
-  fetchData = () => {
-    if (window.chrome && window.chrome.tabs) {
-      window.chrome.tabs
-        .query({active: true, currentWindow: true}, (tabs) => {
-          this.setCurrentUrl(tabs[0].url);
-        });
-    } else {
-      this.setCurrentUrl(DEFAULT_TAB_URL);
-    }
+  handleSprintChange = (selectedSprint) => {
+    this.handleChange({selectedSprint, isSprintDropdownOpen: false});
+    this.fetchSprintReportData(selectedSprint);
   }
 
-  setCurrentUrl = (url) => {
-    if (!url || url === '') return;
-    const {origin, search} = new URL(url);
-    const searchParams = new URLSearchParams(search);
-    const sprintId = searchParams.get('sprint');
-    const rapidViewId = searchParams.get('rapidView');
+  fetchSprintReportData = (selectedSprintId) => {
+    fetchSprintReport(this.state.jiraUrl, this.state.boardId, selectedSprintId)
+      .then((reportData) => this.handleChange({reportData}));
+  }
+
+  toggleSprintDropDown = () => this.handleChange({
+    isSprintDropdownOpen: !this.state.isSprintDropdownOpen
+  });
+
+  fetchSprintList = () => {
+    // eslint-disable-next-line no-debugger
+    debugger;
+    fetchBoradId(this.state.jiraUrl, this.state.projectName)
+      .then((boardId) => {
+        this.handleChange({boardId});
+        return fetchSprintList(this.state.jiraUrl, boardId);
+      }).then(sprintList => {
+        this.handleChange({sprintList});
+      }).catch(() => {
+        this.handleChange({error: 'Can not fetch data!'});
+      });
+  }
+
+  handleChange = (changedData) => {
     this.setState({
-      currentUrl: url,
-      sprintId,
-      rapidViewId,
-      reportApi:
-        `${origin}${endpoint}?rapidViewId=${rapidViewId}&sprintId=${sprintId}&_=${Date.now()}`
+      ...this.state,
+      ...changedData
     });
   }
+
+  handleSubmit= () => {
+    this.setState({
+      selectedSprint: '',
+      sprintList: [],
+      error: ''
+    });
+    this.fetchSprintList();
+  }
+
+  // fetchData = () => {
+  //   if (window.chrome && window.chrome.tabs) {
+  //     window.chrome.tabs
+  //       .query({active: true, currentWindow: true}, (tabs) => {
+  //         this.setCurrentUrl(tabs[0].url);
+  //       });
+  //   }
+  // }
+
+  // setCurrentUrl = (url) => {
+  //   if (!url || url === '') return;
+  //   const {origin, search} = new URL(url);
+  //   const searchParams = new URLSearchParams(search);
+  //   const sprintId = searchParams.get('sprint');
+  //   const rapidViewId = searchParams.get('rapidView');
+  //   this.setState({
+  //     currentUrl: url,
+  //     sprintId,
+  //     rapidViewId,
+  //     reportApi:
+  //       `${origin}${endpoint}?rapidViewId=${rapidViewId}&sprintId=${sprintId}&_=${Date.now()}`
+  //   });
+  // }
 }
 
 export default SprintReport;

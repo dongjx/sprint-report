@@ -9,7 +9,7 @@ class App extends Component {
 
   render() {
     return (
-      <div className="home" style={{paddingTop: 100}}>
+      <div className="home">
         <div className="header" >
           <div className="logo-box">
             <img src={logo} className="logo" />

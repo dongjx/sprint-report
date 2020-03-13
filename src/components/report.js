@@ -1,65 +1,28 @@
 import React from 'react';
 import {uniq, keys} from 'lodash';
-import axios from 'axios';
-import mockData from './mockData';
 import {
+  STATUS_MAP,
   getTotalSPByIssues,
   getEpicListFromIssues,
-  getSPFromIssue,
   getEpicFromIssue,
   getStatusFromIssue
-} from './reportHelper';
+} from './helpers/reportHelper';
 
 class Report extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      reportApi: this.props.reportApi,
-      errorMsg: this.props.errorMsg,
+    this.props = {
       completedIssues: [],
-      notCompletedissues: [],
-      issueKeysAdded: [],
-      removedIssues: []
+      issuesNotCompletedInCurrentSprint: [],
+      issueKeysAddedDuringSprint: [],
+      puntedIssues: []
     };
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData = () => {
-    // const result = mockData;
-    // this.setState({
-    //   completedIssues: result.contents.completedIssues,
-    //   notCompletedissues: result.contents.issuesNotCompletedInCurrentSprint,
-    //   removedIssues: result.contents.puntedIssues,
-    //   issueKeysAdded: result.contents.issueKeysAddedDuringSprint,
-    // });
-    axios.get(this.state.reportApi)
-      .then((response) => {
-        const result = response.data;
-        this.setState({
-          completedIssues: result.contents.completedIssues,
-          notCompletedissues: result.contents.issuesNotCompletedInCurrentSprint,
-          removedIssues: result.contents.puntedIssues,
-          issueKeysAdded: result.contents.issueKeysAddedDuringSprint,
-        });
-      })
-      .catch((error) => {
-        //console.log(error);
-        this.setState({
-          errorMsg: `${error}`
-        });
-      });
-  }
-
   render() {
-    const {errorMsg} = this.state;
+    const epicList = getEpicListFromIssues(this.getAllIssues());
     return (
       <div>
-        <div className="alert alert-warning" role="alert">
-          {errorMsg}
-        </div>
         <table className="table table-bordered">
           <thead>
             <tr>
@@ -73,53 +36,63 @@ class Report extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {getEpicListFromIssues(this.getAllIssues()).map((epic, index) => (
+            {epicList.map((epic, index) => (
               <tr>
                 <th key={index} scope="row">{epic}</th>
-                <th key={index} scope="row">{this.getOpenedSP(epic)}</th>
-                <th key={index} scope="row">{this.getProgressSP(epic)}</th>
-                <th key={index} scope="row">{this.getBusinessViewSP(epic)}</th>
-                <th key={index} scope="row">{this.getAddedSP(epic)}</th>
-                <th key={index} scope="row">{this.getRemovedSP(epic)}</th>
-                <th key={index} scope="row">{this.getDoneSP(epic)}</th>
+                <th key={index} scope="row">{this.getOpenedTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getProgressTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getBusinessViewTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getAddedTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getRemovedTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getDoneTotalSP(epic)}</th>
               </tr>
             ))}
+            <tr>
+              <th key={1} scope="row">Total</th>
+              <th key={2} scope="row">{this.getOpenedTotalSP()}</th>
+              <th key={3} scope="row">{this.getProgressTotalSP()}</th>
+              <th key={4} scope="row">{this.getBusinessViewTotalSP()}</th>
+              <th key={5} scope="row">{this.getAddedTotalSP()}</th>
+              <th key={6} scope="row">{this.getRemovedTotalSP()}</th>
+              <th key={7} scope="row">{this.getDoneTotalSP()}</th>
+            </tr>
           </tbody>
         </table>
       </div>
     );
   }
 
-  getOpenedSP = (epic) => this.getTotalSPByEpicAndStatus(epic, 'Open')
+  getOpenedTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.OPEN)
 
-  getProgressSP = (epic) => this.getTotalSPByEpicAndStatus(epic, 'In Progress')
+  getProgressTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.PROGRESS)
 
-  getBusinessViewSP = (epic) => this.getTotalSPByEpicAndStatus(epic, 'Waiting For Business Review')
+  getBusinessViewTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.BUSINESS_REVIEW)
 
-  getDoneSP = (epic) => this.getTotalSPByEpicAndStatus(epic, 'Resolved') +
-  this.getTotalSPByEpicAndStatus(epic, 'Closed')
+  getDoneTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.RESOLVED) +
+  this.getTotalSP(epic, STATUS_MAP.CLOSED)
 
-  getAddedSP = (epic) => {
-    const {issueKeysAdded} = this.state;
-    const issueKeys = keys(issueKeysAdded).filter(key => issueKeysAdded[key]);
+  getAddedTotalSP = (epic) => {
+    const {issueKeysAddedDuringSprint} = this.props;
+    const issueKeys = keys(issueKeysAddedDuringSprint)
+      .filter(key => issueKeysAddedDuringSprint[key]);
     return getTotalSPByIssues(this.getAllIssues()
       .filter(issue => issueKeys.includes(issue.key) &&
-      getEpicFromIssue(issue) === epic));
+      (!epic || getEpicFromIssue(issue) === epic)));
   }
 
-  getRemovedSP = (epic) => {
-    const {removedIssues} = this.state;
-    return getTotalSPByIssues(removedIssues
-      .filter(issue => epic === getEpicFromIssue(issue)));
+  getRemovedTotalSP = (epic) => {
+    const {puntedIssues} = this.props;
+    return getTotalSPByIssues(puntedIssues
+      .filter(issue => !epic || epic === getEpicFromIssue(issue)));
   }
 
-  getTotalSPByEpicAndStatus = (epic, status) => getTotalSPByIssues(this.getAllIssues()
-    .filter(issue => getStatusFromIssue(issue) === status &&
-                                getEpicFromIssue(issue) === epic))
+  getTotalSP = (epic, status) => getTotalSPByIssues(this.getAllIssues()
+    .filter(issue => (!status || getStatusFromIssue(issue) === status) &&
+                    (!epic || getEpicFromIssue(issue) === epic)))
 
   getAllIssues = () => {
-    const {completedIssues, notCompletedissues} = this.state;
-    return completedIssues.concat(notCompletedissues);
+    const {completedIssues, issuesNotCompletedInCurrentSprint, puntedIssues} = this.props;
+    return completedIssues.concat(issuesNotCompletedInCurrentSprint).concat(puntedIssues);
   }
 }
 

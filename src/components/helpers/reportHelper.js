@@ -1,6 +1,14 @@
 import {uniq} from 'lodash';
 
 const NO_EPIC_NAME = 'Other without epic';
+const STATUS_MAP = {
+  OPEN: 'Open',
+  PROGRESS: 'In Progress',
+  BUSINESS_REVIEW: 'Waiting For Business Review',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+
+};
 
 const getStatusFromIssue = (issue) => issue && issue.statusName ? issue.statusName : undefined;
 
@@ -25,6 +33,7 @@ const getTotalSPByIssues = (issues) => issues.map(issue => getSPFromIssue(issue)
   .reduce((prev, cur) => prev + cur, 0);
 
 export {
+  STATUS_MAP,
   getTotalSPByIssues,
   getEpicListFromIssues,
   getSPFromIssue,
