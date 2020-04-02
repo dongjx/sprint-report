@@ -1,0 +1,23 @@
+{
+  "name": "Spring report chrome extension",
+  "version": "1.0",
+  "description": "Spring report ",
+  "permissions": [
+    "tabs",
+    "http://*/*",
+    "https://*/*",
+    "background",
+    "*://*.google.com/",
+    "notifications",
+    "storage"
+  ],
+  "browser_action": {
+    "default_title": "Spring report",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "static/img/logo.png"
+    }
+  },
+  "options_page": "index.html",
+  "manifest_version": 2
+}
