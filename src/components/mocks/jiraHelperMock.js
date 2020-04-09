@@ -2,15 +2,15 @@ import * as jiraHelper from '../helpers/jiraHelper';
 import mockViewData from './mockViewData';
 import mockSprintData from './mockSprintData';
 import mockSprintReportData from './mockSprintReportData';
+import mockEpicData from './mockEpicData';
 
-const fetchBoradId = (origin, projectName) => jiraHelper
-  .fetchBoradId(origin, projectName)
+const fetchBoardList = (origin, projectName) => jiraHelper
+  .fetchBoardList(origin, projectName)
   .catch((error) => {
     const response = mockViewData;
     const {views} = response;
-    const view = views && views.filter(it => it.name === projectName)[0];
-    if (view && view.id) {
-      return view.id;
+    if (views) {
+      return views.map(it => ({id: it.id, name: it.name}));
     }
     return Promise.reject();
   });
@@ -36,8 +36,19 @@ const fetchSprintReport = (origin, boardId, sprintId) => jiraHelper
     return Promise.reject();
   });
 
+const fetchEpic = (origin, epicKey) => jiraHelper
+  .fetchEpic(origin, epicKey)
+  .catch(error => {
+    const response = mockEpicData;
+    if (response) {
+      return response;
+    }
+    return Promise.reject();
+  });
+
 export {
-  fetchBoradId,
+  fetchEpic,
+  fetchBoardList,
   fetchSprintList,
   fetchSprintReport
 };

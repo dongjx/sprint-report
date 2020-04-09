@@ -1,16 +1,15 @@
 import sendRequest from './apiService';
 import JIRA_ENDPOINTS from './jiraServices';
 
-const fetchBoradId = (origin, projectName) => sendRequest(
+const fetchBoardList = (origin, projectName) => sendRequest(
   origin,
   JIRA_ENDPOINTS.VIEW_LIST,
   {},
   {projectKey: projectName}
 ).then((response) => {
   const {views} = response.data;
-  const view = views && views.filter(it => it.name === projectName)[0];
-  if (view && view.id) {
-    return view.id;
+  if (views) {
+    return views.map(it => ({id: it.id, name: it.name}));
   }
   return Promise.reject();
 });
@@ -40,8 +39,20 @@ const fetchSprintReport = (origin, boardId, sprintId) => sendRequest(
   return Promise.reject();
 });
 
+const fetchEpic = (origin, epicKey) => sendRequest(
+  origin,
+  JIRA_ENDPOINTS.GET_EPIC,
+  {epicKey}
+).then((epic) => {
+  if (epic) {
+    return epic;
+  }
+  return Promise.reject();
+});
+
 export {
-  fetchBoradId,
+  fetchEpic,
+  fetchBoardList,
   fetchSprintList,
   fetchSprintReport
 };

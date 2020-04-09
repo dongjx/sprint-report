@@ -1,3 +1,5 @@
+/* eslint-disable no-debugger */
+/* eslint-disable react/no-did-mount-set-state */
 import React from 'react';
 import {uniq, keys} from 'lodash';
 import {
@@ -9,17 +11,34 @@ import {
 } from './helpers/reportHelper';
 
 class Report extends React.Component {
+  state = {
+    completedIssues: [],
+    issuesNotCompletedInCurrentSprint: [],
+    issueKeysAddedDuringSprint: [],
+    puntedIssues: [],
+  };
+
   constructor(props) {
     super(props);
     this.props = {
       completedIssues: [],
       issuesNotCompletedInCurrentSprint: [],
       issueKeysAddedDuringSprint: [],
-      puntedIssues: []
+      puntedIssues: [],
     };
   }
 
+  componentWillReceiveProps = (nextProps) => {
+    this.setState({
+      completedIssues: nextProps.completedIssues,
+      issuesNotCompletedInCurrentSprint: nextProps.issuesNotCompletedInCurrentSprint,
+      issueKeysAddedDuringSprint: nextProps.issueKeysAddedDuringSprint,
+      puntedIssues: nextProps.puntedIssues,
+    });
+  }
+
   render() {
+    debugger;
     const epicList = getEpicListFromIssues(this.getAllIssues());
     return (
       <div>
@@ -39,12 +58,12 @@ class Report extends React.Component {
             {epicList.map((epic, index) => (
               <tr>
                 <th key={index} scope="row">{epic}</th>
-                <th key={index} scope="row">{this.getOpenedTotalSP(epic)}</th>
-                <th key={index} scope="row">{this.getProgressTotalSP(epic)}</th>
-                <th key={index} scope="row">{this.getBusinessViewTotalSP(epic)}</th>
-                <th key={index} scope="row">{this.getAddedTotalSP(epic)}</th>
-                <th key={index} scope="row">{this.getRemovedTotalSP(epic)}</th>
-                <th key={index} scope="row">{this.getDoneTotalSP(epic)}</th>
+                <th key={index} scope="row">{this.getOpenedTotalSP(epic) || ''}</th>
+                <th key={index} scope="row">{this.getProgressTotalSP(epic) || ''}</th>
+                <th key={index} scope="row">{this.getBusinessViewTotalSP(epic) || ''}</th>
+                <th key={index} scope="row">{this.getAddedTotalSP(epic) || ''}</th>
+                <th key={index} scope="row">{this.getRemovedTotalSP(epic) || ''}</th>
+                <th key={index} scope="row">{this.getDoneTotalSP(epic) || ''}</th>
               </tr>
             ))}
             <tr>
@@ -72,7 +91,7 @@ class Report extends React.Component {
   this.getTotalSP(epic, STATUS_MAP.CLOSED)
 
   getAddedTotalSP = (epic) => {
-    const {issueKeysAddedDuringSprint} = this.props;
+    const {issueKeysAddedDuringSprint} = this.state;
     const issueKeys = keys(issueKeysAddedDuringSprint)
       .filter(key => issueKeysAddedDuringSprint[key]);
     return getTotalSPByIssues(this.getAllIssues()
@@ -81,7 +100,7 @@ class Report extends React.Component {
   }
 
   getRemovedTotalSP = (epic) => {
-    const {puntedIssues} = this.props;
+    const {puntedIssues} = this.state;
     return getTotalSPByIssues(puntedIssues
       .filter(issue => !epic || epic === getEpicFromIssue(issue)));
   }
@@ -91,7 +110,7 @@ class Report extends React.Component {
                     (!epic || getEpicFromIssue(issue) === epic)))
 
   getAllIssues = () => {
-    const {completedIssues, issuesNotCompletedInCurrentSprint, puntedIssues} = this.props;
+    const {completedIssues, issuesNotCompletedInCurrentSprint, puntedIssues} = this.state;
     return completedIssues.concat(issuesNotCompletedInCurrentSprint).concat(puntedIssues);
   }
 }

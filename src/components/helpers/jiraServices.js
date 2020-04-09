@@ -21,7 +21,16 @@ const JIRA_ENDPOINTS = {
     defaultParams: {
       _: `${Date.now()}`
     }
-  }
+  },
+  GET_EPIC: {
+    url: '/rest/agile/1.0/epic/{epicKey}',
+    pathParams: {
+      epicKey: ''
+    },
+    defaultParams: {
+      _: `${Date.now()}`
+    }
+  },
 };
 
 export default JIRA_ENDPOINTS;

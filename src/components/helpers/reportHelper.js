@@ -12,8 +12,8 @@ const STATUS_MAP = {
 
 const getStatusFromIssue = (issue) => issue && issue.statusName ? issue.statusName : undefined;
 
-const getEpicFromIssue = (issue) => issue && issue.epicField &&
-issue.epicField.text ? issue.epicField.text : NO_EPIC_NAME;
+const getEpicFromIssue = (issue) => issue && issue.epic &&
+issue.epic.name ? issue.epic.name : NO_EPIC_NAME;
 
 const getSPFromIssue = (issue) => issue &&
   issue.currentEstimateStatistic &&
