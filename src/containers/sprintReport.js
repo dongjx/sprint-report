@@ -124,16 +124,16 @@ class SprintReport extends Component {
   buildIssues = (issues) => {
     const {epicList, statusList} = this.state;
     return issues.map(issue => {
-      let newIssue = {};
+      let newIssue = issue;
       if (issue.epic && epicList.filter(epic => epic.key === issue.epic).length > 0) {
         newIssue = {
-          ...issue,
+          ...newIssue,
           epic: epicList.filter(epic => epic.key === issue.epic)[0]
         };
       }
       if (issue.statusId && statusList.filter(status => status.id === issue.statusId).length > 0) {
         newIssue = {
-          ...issue,
+          ...newIssue,
           statusName: statusList.filter(status => status.id === issue.statusId)[0].name
         };
       }
