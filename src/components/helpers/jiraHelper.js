@@ -39,20 +39,20 @@ const fetchSprintReport = (origin, boardId, sprintId) => sendRequest(
   return Promise.reject();
 });
 
-const fetchEpic = (origin, epicKey) => sendRequest(
+const fetchIssue = (origin, issueKey) => sendRequest(
   origin,
-  JIRA_ENDPOINTS.GET_EPIC,
-  {epicKey}
+  JIRA_ENDPOINTS.GET_ISSUE,
+  {issueKey}
 ).then((response) => {
-  const epic = response.data;
-  if (epic) {
-    return epic;
+  const issue = response.data;
+  if (issue) {
+    return issue;
   }
   return Promise.reject();
 });
 
 export {
-  fetchEpic,
+  fetchIssue,
   fetchBoardList,
   fetchSprintList,
   fetchSprintReport

@@ -22,10 +22,10 @@ const JIRA_ENDPOINTS = {
       _: `${Date.now()}`
     }
   },
-  GET_EPIC: {
-    url: '/rest/agile/1.0/epic/{epicKey}',
+  GET_ISSUE: {
+    url: '/rest/agile/1.0/issue/{issueKey}',
     pathParams: {
-      epicKey: ''
+      issueKey: ''
     },
     defaultParams: {
       _: `${Date.now()}`

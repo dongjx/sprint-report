@@ -7,7 +7,7 @@ import {isEmpty, uniq} from 'lodash';
 import Report from '../components/report';
 import {
   fetchBoardList, fetchSprintList,
-  fetchSprintReport, fetchEpic
+  fetchSprintReport, fetchIssue
 } from '../components/helpers/jiraHelper';
 
 class SprintReport extends Component {
@@ -19,6 +19,7 @@ class SprintReport extends Component {
     boardList: [],
     sprintList: [],
     epicList: [],
+    statusList: [],
     error: '',
     reportData: {},
     isSprintDropdownOpen: false,
@@ -110,24 +111,35 @@ class SprintReport extends Component {
 
   getReportData = () => {
     const {reportData, epicList} = this.state;
-    return {
+    const result = {
       ...reportData,
-      completedIssues: this.buildIssuesWithEpic(reportData.completedIssues, epicList),
+      completedIssues: this.buildIssues(reportData.completedIssues),
       issuesNotCompletedInCurrentSprint: this
-        .buildIssuesWithEpic(reportData.issuesNotCompletedInCurrentSprint, epicList),
-      puntedIssues: this.buildIssuesWithEpic(reportData.puntedIssues, epicList),
+        .buildIssues(reportData.issuesNotCompletedInCurrentSprint),
+      puntedIssues: this.buildIssues(reportData.puntedIssues, epicList),
     };
+    return result;
   }
 
-  buildIssuesWithEpic = (issues, epicList) => issues.map(issue => {
-    if (issue.epic && epicList.filter(epic => epic.key === issue.epic).length > 0) {
-      return {
-        ...issue,
-        epic: epicList.filter(epic => epic.key === issue.epic)[0]
-      };
-    }
-    return issue;
-  });
+  buildIssues = (issues) => {
+    const {epicList, statusList} = this.state;
+    return issues.map(issue => {
+      let newIssue = {};
+      if (issue.epic && epicList.filter(epic => epic.key === issue.epic).length > 0) {
+        newIssue = {
+          ...issue,
+          epic: epicList.filter(epic => epic.key === issue.epic)[0]
+        };
+      }
+      if (issue.statusId && statusList.filter(status => status.id === issue.statusId).length > 0) {
+        newIssue = {
+          ...issue,
+          statusName: statusList.filter(status => status.id === issue.statusId)[0].name
+        };
+      }
+      return newIssue;
+    });
+  }
 
   handleJiraUrlChange = (url) => {
     try {
@@ -145,6 +157,7 @@ class SprintReport extends Component {
       boardList: [],
       sprintList: [],
       epicList: [],
+      statusList: [],
       reportData: {},
       error: ''
     });
@@ -160,6 +173,7 @@ class SprintReport extends Component {
           selectedSprintId: '',
           sprintList: [],
           epicList: [],
+          statusList: [],
           reportData: {},
           error: ''
         });
@@ -197,18 +211,24 @@ class SprintReport extends Component {
         const allIssues = [...reportData.completedIssues,
           ...reportData.issuesNotCompletedInCurrentSprint,
           ...reportData.puntedIssues];
-        this.fetchEpicListByIssues(allIssues);
+        this.fetchEpicAndStatus(allIssues);
         this.handleChange({reportData});
       });
   }
 
-  fetchEpicListByIssues = (issues) => uniq(issues).forEach(issue => {
-    if (issue.epic) {
-      fetchEpic(this.state.jiraUrl, issue.epic)
-        .then(epic => this.handleChange({epicList: [...this.state.epicList, epic]}))
-        .catch(error => this.handleChange({error: 'Fetch epic error'}));
-    }
-  })
+  fetchEpicAndStatus = (issues) => {
+    issues.forEach(issue => {
+      fetchIssue(this.state.jiraUrl, issue.key)
+        .then(it => {
+          if (it.fields && it.fields.epic) {
+            this.handleChange({epicList: [...this.state.epicList, it.fields.epic]});
+          }
+          if (it.fields && it.fields.status) {
+            this.handleChange({statusList: [...this.state.statusList, it.fields.status]});
+          }
+        });
+    });
+  }
 
   toggleSprintDropDown = () => this.handleChange({
     isSprintDropdownOpen: !this.state.isSprintDropdownOpen
