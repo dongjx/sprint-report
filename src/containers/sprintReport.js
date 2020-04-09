@@ -3,7 +3,7 @@ import {
   Input, Button, Dropdown, DropdownToggle, DropdownMenu,
   DropdownItem, ListGroupItem
 } from 'reactstrap';
-import {isEmpty} from 'lodash';
+import {isEmpty, uniq} from 'lodash';
 import Report from '../components/report';
 import {
   fetchBoardList, fetchSprintList,
@@ -202,7 +202,7 @@ class SprintReport extends Component {
       });
   }
 
-  fetchEpicListByIssues = (issues) => issues.forEach(issue => {
+  fetchEpicListByIssues = (issues) => uniq(issues).forEach(issue => {
     if (issue.epic) {
       fetchEpic(this.state.jiraUrl, issue.epic)
         .then(epic => this.handleChange({epicList: [...this.state.epicList, epic]}))

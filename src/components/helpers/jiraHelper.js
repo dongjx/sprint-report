@@ -43,7 +43,8 @@ const fetchEpic = (origin, epicKey) => sendRequest(
   origin,
   JIRA_ENDPOINTS.GET_EPIC,
   {epicKey}
-).then((epic) => {
+).then((response) => {
+  const epic = response.data;
   if (epic) {
     return epic;
   }
