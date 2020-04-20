@@ -7,7 +7,8 @@ import {
   getTotalSPByIssues,
   getEpicListFromIssues,
   getEpicFromIssue,
-  getStatusFromIssue
+  getStatusFromIssue,
+  getUserListFromIssues
 } from './helpers/reportHelper';
 
 class Report extends React.Component {
@@ -38,7 +39,7 @@ class Report extends React.Component {
   }
 
   render() {
-    debugger;
+    const userList = getUserListFromIssues(this.getAllIssues());
     const epicList = getEpicListFromIssues(this.getAllIssues());
     return (
       <div>
@@ -77,9 +78,24 @@ class Report extends React.Component {
             </tr>
           </tbody>
         </table>
+
+        <table className="table table-bordered">
+          <tbody>
+            {userList.map((user, index) => (
+              <tr>
+                <th key={index} scope="row">{user}</th>
+                <th key={index} scope="row">{this.getDoneTotalSPByUser(user) || ''}</th>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
+
+  getDoneTotalSPByUser = (user) => getTotalSPByIssues(this.getAllIssues()
+    .filter(issue => (getStatusFromIssue(issue) === STATUS_MAP.RESOLVED ||
+    getStatusFromIssue(issue) === STATUS_MAP.CLOSED) && issue.assignee === user));
 
   getOpenedTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.OPEN)
 

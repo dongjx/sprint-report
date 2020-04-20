@@ -32,11 +32,15 @@ const getEpicListFromIssues = (issues) => {
 const getTotalSPByIssues = (issues) => issues.map(issue => getSPFromIssue(issue))
   .reduce((prev, cur) => prev + cur, 0);
 
+
+const getUserListFromIssues = (issues) => uniq(issues.map(issue => issue.assignee || 'NONE'));
+
 export {
   STATUS_MAP,
   getTotalSPByIssues,
   getEpicListFromIssues,
   getSPFromIssue,
   getEpicFromIssue,
-  getStatusFromIssue
+  getStatusFromIssue,
+  getUserListFromIssues
 };
