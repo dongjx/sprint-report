@@ -43,7 +43,7 @@ class Report extends React.Component {
     const epicList = getEpicListFromIssues(this.getAllIssues());
     return (
       <div>
-        <table className="table table-bordered">
+        <table className="table table-hover table-bordered thead-dark">
           <thead>
             <tr>
               <th scope="col">Epic</th>
@@ -104,7 +104,7 @@ class Report extends React.Component {
   getBusinessViewTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.BUSINESS_REVIEW)
 
   getDoneTotalSP = (epic) => this.getTotalSP(epic, STATUS_MAP.RESOLVED) +
-  this.getTotalSP(epic, STATUS_MAP.CLOSED)
+  this.getTotalSP(epic, STATUS_MAP.CLOSED) + this.getTotalSP(epic, STATUS_MAP.DONE)
 
   getAddedTotalSP = (epic) => {
     const {issueKeysAddedDuringSprint} = this.state;

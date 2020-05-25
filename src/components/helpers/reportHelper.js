@@ -7,6 +7,7 @@ const STATUS_MAP = {
   BUSINESS_REVIEW: 'Waiting For Business Review',
   RESOLVED: 'Resolved',
   CLOSED: 'Closed',
+  DONE: 'Done',
 
 };
 

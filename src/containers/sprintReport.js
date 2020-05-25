@@ -40,7 +40,7 @@ class SprintReport extends Component {
           {this.state.error}
         </div>}
         <div className="flex-box search-form">
-          <div className="input-group mb-3">
+          <div className="input-group mb-3 form-group">
             <Input
               type="text"
               value={this.state.jiraUrl}
@@ -48,17 +48,15 @@ class SprintReport extends Component {
               onChange={(event) => this.handleJiraUrlChange(event.target.value)}
             />
           </div>
-          <div className="input-group mb-3">
+          <div className="input-group mb-3 form-group">
             <Input
               type="text"
               value={this.state.projectName}
               placeholder="Project name"
-              onChange={event => this.handleChange({projectName: event.target.value})}
+              onChange={event => this.handleChange({projectName: event.target.value.toUpperCase()})}
             />
           </div>
-          <div className="input-group-btn">
-            <Button color="primary" onClick={this.handleSubmit}>GO</Button>
-          </div>
+          <Button className="btn btn-primary" onClick={this.handleSubmit}>GO</Button>
         </div>
         {!isEmpty(boardList) && <div className="sprint-list-content">
           <Dropdown isOpen={isBoardDropDownOpen} toggle={this.toggleBoardDropDown}>
@@ -142,12 +140,7 @@ class SprintReport extends Component {
   }
 
   handleJiraUrlChange = (url) => {
-    try {
-      const {origin} = new URL(url);
-      this.handleChange({jiraUrl: origin});
-    } catch (error) {
-      this.handleChange({error: 'Invalid jira url.'});
-    }
+    this.handleChange({jiraUrl: url});
   }
 
   handleSubmit= () => {
@@ -161,6 +154,13 @@ class SprintReport extends Component {
       reportData: {},
       error: ''
     });
+    try {
+      const {origin} = new URL(this.state.jiraUrl);
+      this.setState({jiraUrl: origin});
+    } catch (error) {
+      this.handleChange({error: 'Invalid jira url.'});
+      return;
+    }
     this.fetchBoardList();
   }
 

@@ -14,7 +14,7 @@ class App extends Component {
           <div className="logo-box">
             <img src={logo} className="logo" />
           </div>
-          <h1> Sprint Report <span className="badge badge-secondary">For Jira</span></h1>
+          <h1 className="title"> Sprint Report <span className="badge badge-info jira-tag">For Jira</span></h1>
         </div>
         <div className="content"> <SprintReport /></div>
       </div>
