@@ -1,3 +1,4 @@
+import {sortBy} from 'lodash';
 import sendRequest from './apiService';
 import JIRA_ENDPOINTS from './jiraServices';
 
@@ -21,7 +22,7 @@ const fetchSprintList = (origin, boardId) => sendRequest(
 ).then((response) => {
   const {sprints} = response.data;
   if (sprints) {
-    return sprints.map(it => ({id: it.id, name: it.name}));
+    return sortBy(sprints.map(it => ({id: it.id, name: it.name})).slice(-10), 'id').reverse();
   }
   return Promise.reject();
 });

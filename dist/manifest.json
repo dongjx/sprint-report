@@ -12,12 +12,18 @@
     "storage"
   ],
   "browser_action": {
-    "default_title": "Spring report",
-    "default_popup": "index.html",
+    "default_title": "Spring Report",
     "default_icon": {
-      "16": "static/img/logo.png"
+      "16": "logo-64.png",
+      "32": "logo-128.png",
+      "64": "logo-256.png"
     }
   },
   "options_page": "index.html",
+  "background": {
+    "scripts": [
+     "background.js"
+    ]
+  },
   "manifest_version": 2
 }

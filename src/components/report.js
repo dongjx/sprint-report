@@ -46,7 +46,7 @@ class Report extends React.Component {
         <table className="table table-hover table-bordered thead-dark">
           <thead>
             <tr>
-              <th scope="col">Epic</th>
+              <th scope="col" className="text-center">Epic</th>
               <th scope="col">Open</th>
               <th scope="col">In-progress</th>
               <th scope="col">Business Review</th>

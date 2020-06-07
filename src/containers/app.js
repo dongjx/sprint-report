@@ -9,14 +9,23 @@ class App extends Component {
 
   render() {
     return (
-      <div className="home">
-        <div className="header" >
-          <div className="logo-box">
-            <img src={logo} className="logo" />
+      <div className="home container-fluid">
+        <div className="header row flex-xl-nowrap">
+          <div className="col-12">
+            <div className="col logo-box">
+              <img src={logo} className="logo" />
+            </div>
+            <div className="col">
+              <h1 className="title">
+                Sprint Report
+                <span className="badge badge-info jira-tag">For Jira</span>
+              </h1>
+            </div>
           </div>
-          <h1 className="title"> Sprint Report <span className="badge badge-info jira-tag">For Jira</span></h1>
         </div>
-        <div className="content"> <SprintReport /></div>
+        <div className="content container">
+          <SprintReport />
+        </div>
       </div>
     );
   }

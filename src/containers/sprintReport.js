@@ -35,12 +35,12 @@ class SprintReport extends Component {
       reportData, boardList, selectedBoardId, isBoardDropDownOpen
     } = this.state;
     return (
-      <div>
+      <div className="form-group">
         {this.state.error && <div className="alert alert-warning" role="alert">
           {this.state.error}
         </div>}
-        <div className="flex-box search-form">
-          <div className="input-group mb-3 form-group">
+        <div className="flex-box search-form form-row">
+          <div className="col-6">
             <Input
               type="text"
               value={this.state.jiraUrl}
@@ -48,7 +48,7 @@ class SprintReport extends Component {
               onChange={(event) => this.handleJiraUrlChange(event.target.value)}
             />
           </div>
-          <div className="input-group mb-3 form-group">
+          <div className="col-4">
             <Input
               type="text"
               value={this.state.projectName}
@@ -56,52 +56,56 @@ class SprintReport extends Component {
               onChange={event => this.handleChange({projectName: event.target.value.toUpperCase()})}
             />
           </div>
-          <Button className="btn btn-primary" onClick={this.handleSubmit}>GO</Button>
+          <div className="col-2">
+            <Button className="btn btn-primary submit" onClick={this.handleSubmit}>GO</Button>
+          </div>
         </div>
-        {!isEmpty(boardList) && <div className="sprint-list-content">
-          <Dropdown isOpen={isBoardDropDownOpen} toggle={this.toggleBoardDropDown}>
-            <DropdownToggle caret>
-              {selectedBoardId ? boardList
-                .filter(board => board.id === selectedBoardId)[0].name : 'Board List'}
-            </DropdownToggle>
-            <DropdownMenu className="no-outline">
-              <div className="sprint-list">
-                {boardList.map((board, index) => (
-                  <ListGroupItem
-                    tag="a"
-                    key={index}
-                    header
-                    onClick={(event) => this.handleBoardChange(board.id)}
-                  >
-                    {board.name}
-                  </ListGroupItem>
-                ))}
-              </div>
-            </DropdownMenu>
-          </Dropdown>
-        </div>}
-        {!isEmpty(sprintList) && <div className="sprint-list-content">
-          <Dropdown isOpen={isSprintDropdownOpen} toggle={this.toggleSprintDropDown}>
-            <DropdownToggle caret>
-              {selectedSprintId ? sprintList
-                .filter(sprint => sprint.id === selectedSprintId)[0].name : 'Sprint List'}
-            </DropdownToggle>
-            <DropdownMenu className="no-outline">
-              <div className="sprint-list">
-                {sprintList.map((sprint, index) => (
-                  <ListGroupItem
-                    tag="a"
-                    key={index}
-                    header
-                    onClick={(event) => this.handleSprintChange(sprint.id)}
-                  >
-                    {sprint.name}
-                  </ListGroupItem>
-                ))}
-              </div>
-            </DropdownMenu>
-          </Dropdown>
-        </div>}
+        <div className="form-row">
+          {!isEmpty(boardList) && <div className="sprint-list-content col">
+            <Dropdown isOpen={isBoardDropDownOpen} toggle={this.toggleBoardDropDown}>
+              <DropdownToggle caret>
+                {selectedBoardId ? boardList
+                  .filter(board => board.id === selectedBoardId)[0].name : 'Board List'}
+              </DropdownToggle>
+              <DropdownMenu className="no-outline">
+                <div className="sprint-list">
+                  {boardList.map((board, index) => (
+                    <ListGroupItem
+                      tag="a"
+                      key={index}
+                      header
+                      onClick={(event) => this.handleBoardChange(board.id)}
+                    >
+                      {board.name}
+                    </ListGroupItem>
+                  ))}
+                </div>
+              </DropdownMenu>
+            </Dropdown>
+          </div>}
+          {!isEmpty(sprintList) && <div className="sprint-list-content col">
+            <Dropdown isOpen={isSprintDropdownOpen} toggle={this.toggleSprintDropDown}>
+              <DropdownToggle caret>
+                {selectedSprintId ? sprintList
+                  .filter(sprint => sprint.id === selectedSprintId)[0].name : 'Sprint List'}
+              </DropdownToggle>
+              <DropdownMenu className="no-outline">
+                <div className="sprint-list">
+                  {sprintList.map((sprint, index) => (
+                    <ListGroupItem
+                      tag="a"
+                      key={index}
+                      header
+                      onClick={(event) => this.handleSprintChange(sprint.id)}
+                    >
+                      {sprint.name}
+                    </ListGroupItem>
+                  ))}
+                </div>
+              </DropdownMenu>
+            </Dropdown>
+          </div>}
+        </div>
         {!isEmpty(reportData) && <Report {...this.getReportData(reportData)} />}
       </div>
     );
@@ -154,18 +158,19 @@ class SprintReport extends Component {
       reportData: {},
       error: ''
     });
+    let jiraOrigin;
     try {
-      const {origin} = new URL(this.state.jiraUrl);
-      this.setState({jiraUrl: origin});
+      jiraOrigin = new URL(this.state.jiraUrl).origin;
+      this.setState({jiraUrl: jiraOrigin});
     } catch (error) {
       this.handleChange({error: 'Invalid jira url.'});
       return;
     }
-    this.fetchBoardList();
+    this.fetchBoardList(jiraOrigin);
   }
 
-  fetchBoardList = () => {
-    fetchBoardList(this.state.jiraUrl, this.state.projectName)
+  fetchBoardList = (jiraOrigin) => {
+    fetchBoardList(jiraOrigin, this.state.projectName)
       .then((boardList) => {
         this.handleChange({
           boardList,
