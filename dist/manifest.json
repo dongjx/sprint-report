@@ -1,14 +1,11 @@
 {
-  "name": "Spring report chrome extension",
+  "name": "Spring Report",
   "version": "1.0",
-  "description": "Spring report ",
+  "description": "Spring report Generator",
   "permissions": [
-    "tabs",
+    "background",
     "http://*/*",
     "https://*/*",
-    "background",
-    "*://*.google.com/",
-    "notifications",
     "storage"
   ],
   "browser_action": {
