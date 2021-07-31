@@ -160,8 +160,13 @@ class SprintReport extends Component {
     });
     let jiraOrigin;
     try {
-      jiraOrigin = new URL(this.state.jiraUrl).origin;
-      this.setState({jiraUrl: jiraOrigin});
+      const url = new URL(this.state.jiraUrl);
+      jiraOrigin = url.origin;
+      let projectName = null;
+      if (new RegExp(/browse\/(\w+)-(\d+)/).test(url.pathname)) {
+        projectName = url.pathname.match(/browse\/(\w+)-(\d+)/)[1];
+      }
+      this.setState({jiraUrl: jiraOrigin, projectName});
     } catch (error) {
       this.handleChange({error: 'Invalid jira url.'});
       return;
